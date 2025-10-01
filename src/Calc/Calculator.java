@@ -1,168 +1,187 @@
+// File: Calculator.java
 package Calc;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.event.*;
-import javax.swing.JButton;
+import javax.swing.*;
 
-/**
- *
- * @author youcefhmd
- */
-public final class Calculator extends javax.swing.JFrame {
-    
-    private static Calculator instance=null; // only one instance private
+public final class Calculator extends JFrame {
 
-    private String currentOperand;
-    private String previousOperand;
-    private String operation;
-
-    private int x, y;
-
-    private Calculator() { //private constructor
-        initComponents();
-        getContentPane().setSize(400, 700);
-        this.clear();
-        this.addEvents();
-    }
-
-     public static Calculator getInstance() {
-        if (instance == null) {
+    // ------------------ Singleton ------------------
+    private static Calculator instance = null;
+    private Calculator() { initComponents(); addEvents(); clear(); }
+    public static Calculator getInstance() {
+        if (instance == null){ 
             instance = new Calculator();
         }
         return instance;
     }
-    public void addEvents() {
-        JButton[] btns = {
-            btn0, btn1, btn2, btn3, btn4,
-            btn5, btn6, btn7, btn8, btn9,
-            btnDiv, btnDot, btnEqual, btnDel,
-            btnMult, btnPlus, btnPlusSub, btnSub, btnClear
-        };
 
-        JButton[] numbers = {
-            btn0, btn1, btn2, btn3, btn4,
-            btn5, btn6, btn7, btn8, btn9
-        };
+    // ------------------ State ------------------
+    private String currentOperand = "";
+    private String previousOperand = "";
+    private String operation = "";
+    private int x, y;
 
-        for (JButton number : numbers) {
-            number.addActionListener((ActionEvent e) -> {
-                appendNumber(((JButton) e.getSource()).getText());
-            });
-        }
+    // ------------------ UI ------------------
+    private JPanel app, buttonsPanel, resultsPanel, titleBar;
+    private JTextField current, previous;
+    private JLabel title;
+    private JButton btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9;
+    private JButton btnPlus, btnSub, btnMult, btnDiv, btnEqual, btnClear, btnDel, btnDot, btnPlusSub;
 
-        for (JButton btn : btns) {
-            btn.addMouseListener(new MouseAdapter() {
-
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    ((JButton) e.getSource()).setBackground(new Color(73, 69, 78));
-                }
-
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    Object b = e.getSource();
-                    if (b == btnDiv || b == btnEqual || b == btnDel || b == btnMult || b == btnSub || b == btnPlus || b == btnClear) {
-                        ((JButton) b).setBackground(new Color(41, 39, 44));
-                    } else {
-                        ((JButton) b).setBackground(new Color(21, 20, 22));
-                    }
-                }
-            });
-        }
+    // ------------------ Factory Method for Buttons ------------------
+    private JButton createButton(String text, Color bgColor, Color fgColor, int width, int height) {
+        JButton button = new JButton(text);
+        button.setBackground(bgColor);
+        button.setForeground(fgColor);
+        button.setFont(new Font("Century Gothic", Font.BOLD, 18));
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createLineBorder(bgColor));
+        button.setPreferredSize(new Dimension(width, height));
+        return button;
     }
 
-    public void clear() {
-        this.currentOperand = "";
-        this.previousOperand = "";
-        this.operation = "";
-        this.updateDisplay();
+    // ------------------ Initialize UI ------------------
+    private void initComponents() {
+        app = new JPanel();
+        resultsPanel = new JPanel();
+        buttonsPanel = new JPanel();
+        titleBar = new JPanel();
+        title = new JLabel("Calculator");
+
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Calculator");
+        setLocation(new Point(500, 100));
+        setUndecorated(true);
+        setResizable(false);
+
+        app.setBackground(new Color(13, 12, 20));
+        app.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        resultsPanel.setBackground(new Color(34, 34, 34));
+        resultsPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        previous = new JTextField();
+        previous.setEditable(false);
+        previous.setBackground(new Color(21, 20, 22));
+        previous.setFont(new Font("Century Gothic", Font.BOLD, 18));
+        previous.setForeground(new Color(203, 198, 213));
+        previous.setHorizontalAlignment(JTextField.RIGHT);
+        previous.setBorder(null);
+        resultsPanel.add(previous, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 320, 50));
+
+        current = new JTextField();
+        current.setEditable(false);
+        current.setBackground(new Color(41, 39, 44));
+        current.setFont(new Font("Century Gothic", Font.BOLD, 24));
+        current.setForeground(Color.WHITE);
+        current.setHorizontalAlignment(JTextField.RIGHT);
+        current.setBorder(null);
+        resultsPanel.add(current, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 50, 320, 60));
+
+        app.add(resultsPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 30, 320, 110));
+
+        buttonsPanel.setBackground(new Color(21, 20, 22));
+        buttonsPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        // Create buttons
+        btn0 = createButton("0", new Color(21, 20, 22), Color.WHITE, 70, 70);
+        btn1 = createButton("1", new Color(21, 20, 22), Color.WHITE, 70, 70);
+        btn2 = createButton("2", new Color(21, 20, 22), Color.WHITE, 70, 70);
+        btn3 = createButton("3", new Color(21, 20, 22), Color.WHITE, 70, 70);
+        btn4 = createButton("4", new Color(21, 20, 22), Color.WHITE, 70, 70);
+        btn5 = createButton("5", new Color(21, 20, 22), Color.WHITE, 70, 70);
+        btn6 = createButton("6", new Color(21, 20, 22), Color.WHITE, 70, 70);
+        btn7 = createButton("7", new Color(21, 20, 22), Color.WHITE, 70, 70);
+        btn8 = createButton("8", new Color(21, 20, 22), Color.WHITE, 70, 70);
+        btn9 = createButton("9", new Color(21, 20, 22), Color.WHITE, 70, 70);
+
+        btnPlus = createButton("+", new Color(41, 39, 44), Color.WHITE, 70, 140);
+        btnSub = createButton("-", new Color(41, 39, 44), Color.WHITE, 70, 70);
+        btnMult = createButton("×", new Color(41, 39, 44), Color.WHITE, 70, 70);
+        btnDiv = createButton("÷", new Color(41, 39, 44), Color.WHITE, 70, 70);
+        btnEqual = createButton("=", new Color(41, 39, 44), Color.WHITE, 70, 70);
+        btnClear = createButton("C", new Color(41, 39, 44), Color.WHITE, 70, 70);
+        btnDel = createButton("←", new Color(41, 39, 44), Color.WHITE, 70, 70);
+        btnDot = createButton(".", new Color(21, 20, 22), Color.WHITE, 70, 70);
+        btnPlusSub = createButton("+/-", new Color(21, 20, 22), Color.WHITE, 70, 70);
+
+        // Add buttons to panel (layout same as original)
+        buttonsPanel.add(btnDel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, -1, -1));
+        buttonsPanel.add(btnClear, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 20, -1, -1));
+        buttonsPanel.add(btnDiv, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 20, -1, -1));
+        buttonsPanel.add(btnMult, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 20, -1, -1));
+
+        buttonsPanel.add(btn7, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, -1, -1));
+        buttonsPanel.add(btn8, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 90, -1, -1));
+        buttonsPanel.add(btn9, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 90, -1, -1));
+        buttonsPanel.add(btnSub, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 90, -1, -1));
+
+        buttonsPanel.add(btn4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 160, -1, -1));
+        buttonsPanel.add(btn5, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 160, -1, -1));
+        buttonsPanel.add(btn6, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 160, -1, -1));
+        buttonsPanel.add(btnPlus, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 160, -1, 140));
+
+        buttonsPanel.add(btn1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 230, -1, -1));
+        buttonsPanel.add(btn2, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 230, -1, -1));
+        buttonsPanel.add(btn3, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 230, -1, -1));
+        buttonsPanel.add(btnEqual, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 300, -1, -1));
+
+        buttonsPanel.add(btnPlusSub, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 300, -1, -1));
+        buttonsPanel.add(btn0, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 300, -1, -1));
+        buttonsPanel.add(btnDot, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 300, -1, -1));
+
+        app.add(buttonsPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 140, 320, 390));
+
+        titleBar.setBackground(new Color(21, 20, 22));
+        titleBar.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        title.setFont(new Font("Century Gothic", Font.BOLD, 17));
+        title.setForeground(Color.WHITE);
+        titleBar.add(title, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 2, -1, 25));
+        app.add(titleBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 320, 30));
+
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        getContentPane().add(app, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 320, 530));
+        pack();
     }
 
-    public void appendNumber(String number) {
-        if (this.currentOperand.equals("0") && number.equals("0")) {
-            return;
-        }
+    // ------------------ Events ------------------
+    private void addEvents() {
+        JButton[] numbers = {btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9};
+        JButton[] operations = {btnPlus, btnSub, btnMult, btnDiv};
 
-        if (number.equals(".") && this.currentOperand.contains(".")) {
-            return;
-        }
+        for (JButton number : numbers) number.addActionListener(e -> appendNumber(number.getText()));
+        for (JButton op : operations) op.addActionListener(e -> chooseOperation(op.getText()));
 
-        if (this.currentOperand.equals("0")
-                && !number.equals("0")
-                && !number.equals(".")) {
-            this.currentOperand = "";
-        }
+        btnDot.addActionListener(e -> appendNumber(currentOperand.isEmpty() ? "0." : "."));
+        btnEqual.addActionListener(e -> { compute(); updateDisplay(); if(currentOperand.equals("Error")) currentOperand=""; });
+        btnClear.addActionListener(e -> clear());
+        btnDel.addActionListener(e -> { if(!currentOperand.isEmpty()) { currentOperand=currentOperand.substring(0,currentOperand.length()-1); updateDisplay(); }});
+        btnPlusSub.addActionListener(e -> { if(!currentOperand.isEmpty()){ float tmp=-Float.parseFloat(currentOperand); currentOperand=(tmp-(int)tmp)!=0?Float.toString(tmp):Integer.toString((int)tmp); updateDisplay(); }});
 
-        this.currentOperand += number;
-        this.updateDisplay();
+        titleBar.addMouseListener(new MouseAdapter(){ public void mousePressed(MouseEvent evt){ x=evt.getX(); y=evt.getY(); }});
+        titleBar.addMouseMotionListener(new MouseMotionAdapter(){ public void mouseDragged(MouseEvent evt){ setLocation(evt.getXOnScreen()-x, evt.getYOnScreen()-y); }});
     }
 
-    public void chooseOperation(String operation) {
-        if (this.currentOperand.equals("") && !this.previousOperand.equals("")) {
-            this.operation = operation;
-            this.updateDisplay();
-        }
-        if (this.currentOperand.equals("")) {
-            return;
-        }
-
-        if (!this.previousOperand.equals("")) {
-            this.compute();
-        }
-
-        this.operation = operation;
-        this.previousOperand = this.currentOperand;
-        this.currentOperand = "";
-        this.updateDisplay();
+    // ------------------ Calculator Logic ------------------
+    private void appendNumber(String number){ if(number.equals(".") && currentOperand.contains(".")) return; if(currentOperand.equals("0") && !number.equals(".")) currentOperand=""; currentOperand+=number; updateDisplay(); }
+    private void chooseOperation(String op){ if(!currentOperand.isEmpty()){ if(!previousOperand.isEmpty()) compute(); operation=op; previousOperand=currentOperand; currentOperand=""; updateDisplay(); }}
+    private void compute(){
+        if(currentOperand.isEmpty() || previousOperand.isEmpty()) return;
+        float curr=Float.parseFloat(currentOperand);
+        float prev=Float.parseFloat(previousOperand);
+        Operation operationObj=OperationFactory.getOperation(operation);
+        if(operationObj==null) return;
+        try{ float result=operationObj.execute(prev,curr); currentOperand=(result-(int)result)!=0?Float.toString(result):Integer.toString((int)result); }catch(ArithmeticException e){ currentOperand="Error"; }
+        previousOperand=""; operation="";
     }
+    private void clear(){ currentOperand=""; previousOperand=""; operation=""; updateDisplay(); }
+    private void updateDisplay(){ current.setText(currentOperand); previous.setText(previousOperand+" "+operation); }
+}
 
-    public void compute() {
-        float computation;
-        if (this.currentOperand.equals("") || this.previousOperand.equals("")) {
-            return;
-        }
-
-        float curr = Float.parseFloat(this.currentOperand);
-        float prev = Float.parseFloat(this.previousOperand);
-        if (Float.isNaN(curr) || Float.isNaN(prev)) {
-            return;
-        }
-
-        switch (this.operation) {
-            case "+" : 
-            computation = prev + curr; 
-             break;
-            case "-" :
-                computation = prev - curr;
-                 break;
-            case "×" :
-                computation = prev * curr;
-                 break;
-            case "÷" : {
-                if (curr == 0) {
-                    this.clear();
-                    this.currentOperand = "Error";
-                    return;
-                }
-                computation = prev / curr;
-                 break;
-            }
-            default : {
-                return;
-            }
-        }
-
-        this.currentOperand = (computation - (int) computation) != 0 ? Float.toString(computation) : Integer.toString((int) computation);
-        this.previousOperand = "";
-        this.operation = "";
-    }
-
-    public void updateDisplay() {
-        current.setText(this.currentOperand);
-        previous.setText(previousOperand + " " + this.operation);
-    }
-
-    @SuppressWarnings("unchecked")
+/*
+    
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
@@ -589,7 +608,6 @@ public final class Calculator extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnDotActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDotActionPerformed
-        appendNumber((this.currentOperand.isEmpty() ? "0." : "."));
     }//GEN-LAST:event_btnDotActionPerformed
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
@@ -597,22 +615,16 @@ public final class Calculator extends javax.swing.JFrame {
     }//GEN-LAST:event_btnClearActionPerformed
 
     private void btnDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDelActionPerformed
-        if (!this.currentOperand.equals("")) {
-            this.currentOperand = this.currentOperand.substring(0, this.currentOperand.length() - 1);
-            this.updateDisplay();
-        }
+
     }//GEN-LAST:event_btnDelActionPerformed
 
     private void btnPlusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlusActionPerformed
-        chooseOperation("+");
     }//GEN-LAST:event_btnPlusActionPerformed
 
     private void btnMultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMultActionPerformed
-        chooseOperation("×");
     }//GEN-LAST:event_btnMultActionPerformed
 
     private void btnSubActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSubActionPerformed
-        chooseOperation("-");
     }//GEN-LAST:event_btnSubActionPerformed
 
     private void btnDivActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDivActionPerformed
@@ -701,4 +713,4 @@ public final class Calculator extends javax.swing.JFrame {
     private javax.swing.JLabel title;
     private javax.swing.JPanel titleBar;
     // End of variables declaration//GEN-END:variables
-}
+
