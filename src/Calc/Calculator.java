@@ -1,4 +1,3 @@
-// File: Calculator.java
 package Calc;
 
 import java.awt.*;
@@ -9,28 +8,24 @@ public final class Calculator extends JFrame {
 
     // ------------------ Singleton ------------------
     private static Calculator instance = null;
-    private Calculator() { initComponents(); addEvents(); clear(); }
+    private Calculator() { initComponents(); addEvents(); updateDisplay(); }
     public static Calculator getInstance() {
-        if (instance == null){ 
-            instance = new Calculator();
-        }
+        if (instance == null) instance = new Calculator();
         return instance;
     }
 
-    // ------------------ State ------------------
-    private String currentOperand = "";
-    private String previousOperand = "";
-    private String operation = "";
+    // ------------------ Facade ------------------
+    private final CalculatorFacade facade = new CalculatorFacade();
     private int x, y;
 
-    // ------------------ UI ------------------
+    // ------------------ UI Components ------------------
     private JPanel app, buttonsPanel, resultsPanel, titleBar;
     private JTextField current, previous;
     private JLabel title;
     private JButton btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9;
     private JButton btnPlus, btnSub, btnMult, btnDiv, btnEqual, btnClear, btnDel, btnDot, btnPlusSub;
 
-    // ------------------ Factory Method for Buttons ------------------
+    // ------------------ Create Button ------------------
     private JButton createButton(String text, Color bgColor, Color fgColor, int width, int height) {
         JButton button = new JButton(text);
         button.setBackground(bgColor);
@@ -85,7 +80,7 @@ public final class Calculator extends JFrame {
         buttonsPanel.setBackground(new Color(21, 20, 22));
         buttonsPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        // Create buttons
+        // ------------------ Create Buttons ------------------
         btn0 = createButton("0", new Color(21, 20, 22), Color.WHITE, 70, 70);
         btn1 = createButton("1", new Color(21, 20, 22), Color.WHITE, 70, 70);
         btn2 = createButton("2", new Color(21, 20, 22), Color.WHITE, 70, 70);
@@ -107,7 +102,7 @@ public final class Calculator extends JFrame {
         btnDot = createButton(".", new Color(21, 20, 22), Color.WHITE, 70, 70);
         btnPlusSub = createButton("+/-", new Color(21, 20, 22), Color.WHITE, 70, 70);
 
-        // Add buttons to panel (layout same as original)
+        // ------------------ Add Buttons to Panel ------------------
         buttonsPanel.add(btnDel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, -1, -1));
         buttonsPanel.add(btnClear, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 20, -1, -1));
         buttonsPanel.add(btnDiv, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 20, -1, -1));
@@ -148,37 +143,42 @@ public final class Calculator extends JFrame {
 
     // ------------------ Events ------------------
     private void addEvents() {
+        // Number buttons
         JButton[] numbers = {btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9};
-        JButton[] operations = {btnPlus, btnSub, btnMult, btnDiv};
+        for (int i = 0; i < numbers.length; i++) {
+            int num = i; // capture for lambda
+            numbers[i].addActionListener(e -> { facade.appendNumber(Integer.toString(num)); updateDisplay(); });
+        }
 
-        for (JButton number : numbers) number.addActionListener(e -> appendNumber(number.getText()));
-        for (JButton op : operations) op.addActionListener(e -> chooseOperation(op.getText()));
+        // Operation buttons
+        btnPlus.addActionListener(e -> { facade.chooseOperation("+"); updateDisplay(); });
+        btnSub.addActionListener(e -> { facade.chooseOperation("-"); updateDisplay(); });
+        btnMult.addActionListener(e -> { facade.chooseOperation("×"); updateDisplay(); });
+        btnDiv.addActionListener(e -> { facade.chooseOperation("÷"); updateDisplay(); });
 
-        btnDot.addActionListener(e -> appendNumber(currentOperand.isEmpty() ? "0." : "."));
-        btnEqual.addActionListener(e -> { compute(); updateDisplay(); if(currentOperand.equals("Error")) currentOperand=""; });
-        btnClear.addActionListener(e -> clear());
-        btnDel.addActionListener(e -> { if(!currentOperand.isEmpty()) { currentOperand=currentOperand.substring(0,currentOperand.length()-1); updateDisplay(); }});
-        btnPlusSub.addActionListener(e -> { if(!currentOperand.isEmpty()){ float tmp=-Float.parseFloat(currentOperand); currentOperand=(tmp-(int)tmp)!=0?Float.toString(tmp):Integer.toString((int)tmp); updateDisplay(); }});
+        // Other buttons
+        btnDot.addActionListener(e -> { facade.appendNumber("."); updateDisplay(); });
+        btnEqual.addActionListener(e -> { facade.compute(); updateDisplay(); });
+        btnClear.addActionListener(e -> { facade.clear(); updateDisplay(); });
+        btnDel.addActionListener(e -> { facade.deleteLast(); updateDisplay(); });
+        btnPlusSub.addActionListener(e -> { facade.togglePlusMinus(); updateDisplay(); });
 
-        titleBar.addMouseListener(new MouseAdapter(){ public void mousePressed(MouseEvent evt){ x=evt.getX(); y=evt.getY(); }});
-        titleBar.addMouseMotionListener(new MouseMotionAdapter(){ public void mouseDragged(MouseEvent evt){ setLocation(evt.getXOnScreen()-x, evt.getYOnScreen()-y); }});
+        // Drag window
+        titleBar.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent evt) { x = evt.getX(); y = evt.getY(); }
+        });
+        titleBar.addMouseMotionListener(new MouseMotionAdapter() {
+            public void mouseDragged(MouseEvent evt) { setLocation(evt.getXOnScreen() - x, evt.getYOnScreen() - y); }
+        });
     }
 
-    // ------------------ Calculator Logic ------------------
-    private void appendNumber(String number){ if(number.equals(".") && currentOperand.contains(".")) return; if(currentOperand.equals("0") && !number.equals(".")) currentOperand=""; currentOperand+=number; updateDisplay(); }
-    private void chooseOperation(String op){ if(!currentOperand.isEmpty()){ if(!previousOperand.isEmpty()) compute(); operation=op; previousOperand=currentOperand; currentOperand=""; updateDisplay(); }}
-    private void compute(){
-        if(currentOperand.isEmpty() || previousOperand.isEmpty()) return;
-        float curr=Float.parseFloat(currentOperand);
-        float prev=Float.parseFloat(previousOperand);
-        Operation operationObj=OperationFactory.getOperation(operation);
-        if(operationObj==null) return;
-        try{ float result=operationObj.execute(prev,curr); currentOperand=(result-(int)result)!=0?Float.toString(result):Integer.toString((int)result); }catch(ArithmeticException e){ currentOperand="Error"; }
-        previousOperand=""; operation="";
+    // ------------------ Update Display ------------------
+    private void updateDisplay() {
+        current.setText(facade.getCurrentDisplay());
+        previous.setText(facade.getPreviousDisplay());
     }
-    private void clear(){ currentOperand=""; previousOperand=""; operation=""; updateDisplay(); }
-    private void updateDisplay(){ current.setText(currentOperand); previous.setText(previousOperand+" "+operation); }
 }
+
 
 /*
     
