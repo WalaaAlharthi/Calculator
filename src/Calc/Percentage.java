@@ -7,19 +7,16 @@ package Calc;
 
 /**
  *
- * @author reham
+ * @author wla03
  */
 
-
-public class Addition implements Operation {
+public class Percentage implements Operation {
     private final Operation left, right;
-    public Addition(Operation left, Operation right) {
+    public Percentage(Operation left, Operation right) {
         this.left = left; this.right = right;
     }
     @Override
     public float execute() {
-        return left.execute() + right.execute();
+        return (left.execute() * right.execute()) / 100f;
     }
 }
-
-

@@ -12,19 +12,31 @@ package Calc;
 // File: OperationFactory.java
 
 
+
+
 public class OperationFactory {
 
-    public static Operation getOperation(String op) {
-        if (op.equals("+")) {
-            return new Addition();
-        } else if (op.equals("-")) {
-            return new Subtraction();
-        } else if (op.equals("×")) {
-            return new Multiplication();
-        } else if (op.equals("÷")) {
-            return new Division();
-        } else {
-            return null;
+    public static Operation createBinaryOperation(String op, Operation left, Operation right) {
+        switch (op) {
+            case "+":
+                return new Addition(left, right);
+            case "-":
+                return new Subtraction(left, right);
+            case "*":
+                return new Multiplication(left, right);
+            case "/":
+                return new Division(left, right);
+            case "^":
+            case "power":
+                return new Power(left, right);
+            case "root":
+                return new Root(left, right);
+            case "log":
+                return new Logarithm(left, right);
+            case "%": 
+                return new Modulus(left, right);
+            default:
+                throw new IllegalArgumentException("Unsupported operation: " + op);
         }
     }
 }

@@ -1,31 +1,45 @@
 package Calc;
 
+
+
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
 public final class Calculator extends JFrame {
-
+    
+    
     // ------------------ Singleton ------------------
+
     private static Calculator instance = null;
-    private Calculator() { initComponents(); addEvents(); updateDisplay(); }
-    public static Calculator getInstance() {
-        if (instance == null) instance = new Calculator();
-        return instance;
+
+    private Calculator() {
+        initComponents();
+        addEvents();
+        updateDisplay();
     }
 
+    public static Calculator getInstance() {
+        if (instance == null){
+            
+      instance = new Calculator();
+        }
+        return instance;
+    }
     // ------------------ Facade ------------------
     private final CalculatorFacade facade = new CalculatorFacade();
     private int x, y;
 
-    // ------------------ UI Components ------------------
     private JPanel app, buttonsPanel, resultsPanel, titleBar;
     private JTextField current, previous;
     private JLabel title;
     private JButton btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9;
     private JButton btnPlus, btnSub, btnMult, btnDiv, btnEqual, btnClear, btnDel, btnDot, btnPlusSub;
 
-    // ------------------ Create Button ------------------
+  
+    private JButton btnPower, btnRoot, btnLog, btnMod;
+
     private JButton createButton(String text, Color bgColor, Color fgColor, int width, int height) {
         JButton button = new JButton(text);
         button.setBackground(bgColor);
@@ -33,16 +47,15 @@ public final class Calculator extends JFrame {
         button.setFont(new Font("Century Gothic", Font.BOLD, 18));
         button.setFocusPainted(false);
         button.setBorder(BorderFactory.createLineBorder(bgColor));
-        button.setPreferredSize(new Dimension(width, height));
+        button.setBounds(0, 0, width, height);
         return button;
     }
 
-    // ------------------ Initialize UI ------------------
     private void initComponents() {
-        app = new JPanel();
-        resultsPanel = new JPanel();
-        buttonsPanel = new JPanel();
-        titleBar = new JPanel();
+        app = new JPanel(null);
+        resultsPanel = new JPanel(null);
+        buttonsPanel = new JPanel(null);
+        titleBar = new JPanel(null);
         title = new JLabel("Calculator");
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -50,12 +63,13 @@ public final class Calculator extends JFrame {
         setLocation(new Point(500, 100));
         setUndecorated(true);
         setResizable(false);
+        setSize(320, 600); // ✅ زودنا الطول شوي لأننا بنضيف صف جديد
 
         app.setBackground(new Color(13, 12, 20));
-        app.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        app.setLayout(null);
 
         resultsPanel.setBackground(new Color(34, 34, 34));
-        resultsPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        resultsPanel.setBounds(0, 30, 320, 110);
 
         previous = new JTextField();
         previous.setEditable(false);
@@ -64,7 +78,8 @@ public final class Calculator extends JFrame {
         previous.setForeground(new Color(203, 198, 213));
         previous.setHorizontalAlignment(JTextField.RIGHT);
         previous.setBorder(null);
-        resultsPanel.add(previous, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 320, 50));
+        previous.setBounds(0, 0, 320, 50);
+        resultsPanel.add(previous);
 
         current = new JTextField();
         current.setEditable(false);
@@ -73,14 +88,15 @@ public final class Calculator extends JFrame {
         current.setForeground(Color.WHITE);
         current.setHorizontalAlignment(JTextField.RIGHT);
         current.setBorder(null);
-        resultsPanel.add(current, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 50, 320, 60));
+        current.setBounds(0, 50, 320, 60);
+        resultsPanel.add(current);
 
-        app.add(resultsPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 30, 320, 110));
+        app.add(resultsPanel);
 
         buttonsPanel.setBackground(new Color(21, 20, 22));
-        buttonsPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        buttonsPanel.setBounds(0, 140, 320, 460); // ✅ زودنا الطول شوي
 
-        // ------------------ Create Buttons ------------------
+        // الأزرار الأساسية
         btn0 = createButton("0", new Color(21, 20, 22), Color.WHITE, 70, 70);
         btn1 = createButton("1", new Color(21, 20, 22), Color.WHITE, 70, 70);
         btn2 = createButton("2", new Color(21, 20, 22), Color.WHITE, 70, 70);
@@ -102,615 +118,136 @@ public final class Calculator extends JFrame {
         btnDot = createButton(".", new Color(21, 20, 22), Color.WHITE, 70, 70);
         btnPlusSub = createButton("+/-", new Color(21, 20, 22), Color.WHITE, 70, 70);
 
-        // ------------------ Add Buttons to Panel ------------------
-        buttonsPanel.add(btnDel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, -1, -1));
-        buttonsPanel.add(btnClear, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 20, -1, -1));
-        buttonsPanel.add(btnDiv, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 20, -1, -1));
-        buttonsPanel.add(btnMult, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 20, -1, -1));
+        // ✅ NEW - العمليات العلمية
+        btnPower = createButton("^", new Color(41, 39, 44), Color.WHITE, 70, 70);
+        btnRoot = createButton("√", new Color(41, 39, 44), Color.WHITE, 70, 70);
+        btnLog = createButton("log", new Color(41, 39, 44), Color.WHITE, 70, 70);
+        btnMod = createButton("%", new Color(41, 39, 44), Color.WHITE, 70, 70);
 
-        buttonsPanel.add(btn7, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, -1, -1));
-        buttonsPanel.add(btn8, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 90, -1, -1));
-        buttonsPanel.add(btn9, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 90, -1, -1));
-        buttonsPanel.add(btnSub, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 90, -1, -1));
+        // ✅ أماكن الأزرار الجديدة تحت آخر صف
+        btnPower.setBounds(20, 370, 70, 70);
+        btnRoot.setBounds(90, 370, 70, 70);
+        btnLog.setBounds(160, 370, 70, 70);
+        btnMod.setBounds(230, 370, 70, 70);
 
-        buttonsPanel.add(btn4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 160, -1, -1));
-        buttonsPanel.add(btn5, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 160, -1, -1));
-        buttonsPanel.add(btn6, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 160, -1, -1));
-        buttonsPanel.add(btnPlus, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 160, -1, 140));
+        // ترتيب الأزرار القديمة
+        btnDel.setBounds(20, 20, 70, 70);
+        btnClear.setBounds(90, 20, 70, 70);
+        btnDiv.setBounds(160, 20, 70, 70);
+        btnMult.setBounds(230, 20, 70, 70);
 
-        buttonsPanel.add(btn1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 230, -1, -1));
-        buttonsPanel.add(btn2, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 230, -1, -1));
-        buttonsPanel.add(btn3, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 230, -1, -1));
-        buttonsPanel.add(btnEqual, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 300, -1, -1));
+        btn7.setBounds(20, 90, 70, 70);
+        btn8.setBounds(90, 90, 70, 70);
+        btn9.setBounds(160, 90, 70, 70);
+        btnSub.setBounds(230, 90, 70, 70);
 
-        buttonsPanel.add(btnPlusSub, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 300, -1, -1));
-        buttonsPanel.add(btn0, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 300, -1, -1));
-        buttonsPanel.add(btnDot, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 300, -1, -1));
+        btn4.setBounds(20, 160, 70, 70);
+        btn5.setBounds(90, 160, 70, 70);
+        btn6.setBounds(160, 160, 70, 70);
+        btnPlus.setBounds(230, 160, 70, 140);
 
-        app.add(buttonsPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 140, 320, 390));
+        btn1.setBounds(20, 230, 70, 70);
+        btn2.setBounds(90, 230, 70, 70);
+        btn3.setBounds(160, 230, 70, 70);
+        btnEqual.setBounds(230, 300, 70, 70);
+
+        btnPlusSub.setBounds(20, 300, 70, 70);
+        btn0.setBounds(90, 300, 70, 70);
+        btnDot.setBounds(160, 300, 70, 70);
+
+        // ✅ إضافة الأزرار الجديدة
+        buttonsPanel.add(btnPower);
+        buttonsPanel.add(btnRoot);
+        buttonsPanel.add(btnLog);
+        buttonsPanel.add(btnMod);
+
+        // إضافة القديمة
+        buttonsPanel.add(btnDel);
+        buttonsPanel.add(btnClear);
+        buttonsPanel.add(btnDiv);
+        buttonsPanel.add(btnMult);
+        buttonsPanel.add(btn7);
+        buttonsPanel.add(btn8);
+        buttonsPanel.add(btn9);
+        buttonsPanel.add(btnSub);
+        buttonsPanel.add(btn4);
+        buttonsPanel.add(btn5);
+        buttonsPanel.add(btn6);
+        buttonsPanel.add(btnPlus);
+        buttonsPanel.add(btn1);
+        buttonsPanel.add(btn2);
+        buttonsPanel.add(btn3);
+        buttonsPanel.add(btnEqual);
+        buttonsPanel.add(btnPlusSub);
+        buttonsPanel.add(btn0);
+        buttonsPanel.add(btnDot);
+
+        app.add(buttonsPanel);
 
         titleBar.setBackground(new Color(21, 20, 22));
-        titleBar.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        titleBar.setBounds(0, 0, 320, 30);
+
         title.setFont(new Font("Century Gothic", Font.BOLD, 17));
         title.setForeground(Color.WHITE);
-        titleBar.add(title, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 2, -1, 25));
-        app.add(titleBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 320, 30));
+        title.setBounds(6, 2, 200, 25);
+        titleBar.add(title);
 
-        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-        getContentPane().add(app, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 320, 530));
-        pack();
+        app.add(titleBar);
+        add(app);
     }
 
-    // ------------------ Events ------------------
     private void addEvents() {
-        // Number buttons
         JButton[] numbers = {btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9};
         for (int i = 0; i < numbers.length; i++) {
-            int num = i; // capture for lambda
-            numbers[i].addActionListener(e -> { facade.appendNumber(Integer.toString(num)); updateDisplay(); });
+            int num = i;
+            numbers[i].addActionListener(e -> {
+                facade.appendNumber(Integer.toString(num));
+                updateDisplay();
+            });
         }
 
-        // Operation buttons
         btnPlus.addActionListener(e -> { facade.chooseOperation("+"); updateDisplay(); });
         btnSub.addActionListener(e -> { facade.chooseOperation("-"); updateDisplay(); });
         btnMult.addActionListener(e -> { facade.chooseOperation("×"); updateDisplay(); });
         btnDiv.addActionListener(e -> { facade.chooseOperation("÷"); updateDisplay(); });
 
-        // Other buttons
+        // ✅ الأحداث الجديدة
+        btnPower.addActionListener(e -> { facade.chooseOperation("power"); updateDisplay(); });
+        btnRoot.addActionListener(e -> { facade.chooseOperation("root"); updateDisplay(); });
+        btnLog.addActionListener(e -> { facade.chooseOperation("log"); updateDisplay(); });
+        btnMod.addActionListener(e -> { facade.chooseOperation("%"); updateDisplay(); });
+
         btnDot.addActionListener(e -> { facade.appendNumber("."); updateDisplay(); });
-        btnEqual.addActionListener(e -> { facade.compute(); updateDisplay(); });
+
+        btnEqual.addActionListener(e -> {
+            try {
+                String expression = facade.getCurrentDisplay();
+                Operation op = ExpressionParser.parse(expression);
+                float result = op.execute();
+                facade.setCurrentDisplay(String.valueOf(result));
+                facade.clearPrevious();
+            } catch (Exception ex) {
+                facade.setCurrentDisplay("Error");
+            }
+            updateDisplay();
+        });
+
         btnClear.addActionListener(e -> { facade.clear(); updateDisplay(); });
         btnDel.addActionListener(e -> { facade.deleteLast(); updateDisplay(); });
         btnPlusSub.addActionListener(e -> { facade.togglePlusMinus(); updateDisplay(); });
 
-        // Drag window
         titleBar.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent evt) { x = evt.getX(); y = evt.getY(); }
         });
         titleBar.addMouseMotionListener(new MouseMotionAdapter() {
-            public void mouseDragged(MouseEvent evt) { setLocation(evt.getXOnScreen() - x, evt.getYOnScreen() - y); }
+            public void mouseDragged(MouseEvent evt) {
+                setLocation(evt.getXOnScreen() - x, evt.getYOnScreen() - y);
+            }
         });
     }
 
-    // ------------------ Update Display ------------------
     private void updateDisplay() {
         current.setText(facade.getCurrentDisplay());
         previous.setText(facade.getPreviousDisplay());
     }
 }
-
-
-/*
-    
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        app = new javax.swing.JPanel();
-        resultsPanel = new javax.swing.JPanel();
-        previous = new javax.swing.JTextField();
-        current = new javax.swing.JTextField();
-        buttonsPanel = new javax.swing.JPanel();
-        btnDel = new javax.swing.JButton();
-        btnClear = new javax.swing.JButton();
-        btnDiv = new javax.swing.JButton();
-        btnMult = new javax.swing.JButton();
-        btn7 = new javax.swing.JButton();
-        btn8 = new javax.swing.JButton();
-        btn9 = new javax.swing.JButton();
-        btnSub = new javax.swing.JButton();
-        btn4 = new javax.swing.JButton();
-        btn5 = new javax.swing.JButton();
-        btn6 = new javax.swing.JButton();
-        btnPlus = new javax.swing.JButton();
-        btn1 = new javax.swing.JButton();
-        btn2 = new javax.swing.JButton();
-        btn3 = new javax.swing.JButton();
-        btnPlusSub = new javax.swing.JButton();
-        btn0 = new javax.swing.JButton();
-        btnDot = new javax.swing.JButton();
-        btnEqual = new javax.swing.JButton();
-        titleBar = new javax.swing.JPanel();
-        title = new javax.swing.JLabel();
-        btnMini = new javax.swing.JButton();
-        btnClose = new javax.swing.JButton();
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Calculator");
-        setLocation(new java.awt.Point(500, 100));
-        setUndecorated(true);
-        setResizable(false);
-
-        app.setBackground(new java.awt.Color(13, 12, 20));
-        app.setForeground(new java.awt.Color(40, 40, 40));
-        app.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        resultsPanel.setBackground(new java.awt.Color(34, 34, 34));
-        resultsPanel.setForeground(new java.awt.Color(57, 57, 57));
-        resultsPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        previous.setEditable(false);
-        previous.setBackground(new java.awt.Color(21, 20, 22));
-        previous.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        previous.setForeground(new java.awt.Color(203, 198, 213));
-        previous.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        previous.setBorder(null);
-        resultsPanel.add(previous, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 320, 50));
-
-        current.setEditable(false);
-        current.setBackground(new java.awt.Color(41, 39, 44));
-        current.setFont(new java.awt.Font("Century Gothic", 1, 24)); // NOI18N
-        current.setForeground(new java.awt.Color(255, 255, 255));
-        current.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        current.setBorder(null);
-        resultsPanel.add(current, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 50, 320, 60));
-
-        app.add(resultsPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 30, 320, 110));
-
-        buttonsPanel.setBackground(new java.awt.Color(21, 20, 22));
-        buttonsPanel.setPreferredSize(new java.awt.Dimension(250, 50));
-        buttonsPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        btnDel.setBackground(new java.awt.Color(41, 39, 44));
-        btnDel.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btnDel.setForeground(new java.awt.Color(255, 255, 255));
-        btnDel.setText("←");
-        btnDel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btnDel.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnDel.setFocusPainted(false);
-        btnDel.setIconTextGap(1);
-        btnDel.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btnDel.setPreferredSize(new java.awt.Dimension(70, 70));
-        btnDel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDelActionPerformed(evt);
-            }
-        });
-        buttonsPanel.add(btnDel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, -1, -1));
-
-        btnClear.setBackground(new java.awt.Color(41, 39, 44));
-        btnClear.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btnClear.setForeground(new java.awt.Color(255, 255, 255));
-        btnClear.setText("C");
-        btnClear.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btnClear.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnClear.setFocusPainted(false);
-        btnClear.setIconTextGap(1);
-        btnClear.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btnClear.setPreferredSize(new java.awt.Dimension(70, 70));
-        btnClear.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnClearActionPerformed(evt);
-            }
-        });
-        buttonsPanel.add(btnClear, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 20, -1, -1));
-
-        btnDiv.setBackground(new java.awt.Color(41, 39, 44));
-        btnDiv.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btnDiv.setForeground(new java.awt.Color(255, 255, 255));
-        btnDiv.setText("÷");
-        btnDiv.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btnDiv.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnDiv.setFocusPainted(false);
-        btnDiv.setIconTextGap(1);
-        btnDiv.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btnDiv.setPreferredSize(new java.awt.Dimension(70, 70));
-        btnDiv.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDivActionPerformed(evt);
-            }
-        });
-        buttonsPanel.add(btnDiv, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 20, -1, -1));
-
-        btnMult.setBackground(new java.awt.Color(41, 39, 44));
-        btnMult.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btnMult.setForeground(new java.awt.Color(255, 255, 255));
-        btnMult.setText("×");
-        btnMult.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btnMult.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnMult.setFocusPainted(false);
-        btnMult.setIconTextGap(1);
-        btnMult.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btnMult.setPreferredSize(new java.awt.Dimension(70, 70));
-        btnMult.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnMultActionPerformed(evt);
-            }
-        });
-        buttonsPanel.add(btnMult, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 20, -1, -1));
-
-        btn7.setBackground(new java.awt.Color(21, 20, 22));
-        btn7.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btn7.setForeground(new java.awt.Color(255, 255, 255));
-        btn7.setText("7");
-        btn7.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btn7.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btn7.setFocusPainted(false);
-        btn7.setIconTextGap(1);
-        btn7.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btn7.setPreferredSize(new java.awt.Dimension(70, 70));
-        buttonsPanel.add(btn7, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, -1, -1));
-
-        btn8.setBackground(new java.awt.Color(21, 20, 22));
-        btn8.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btn8.setForeground(new java.awt.Color(255, 255, 255));
-        btn8.setText("8");
-        btn8.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btn8.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btn8.setFocusPainted(false);
-        btn8.setIconTextGap(1);
-        btn8.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btn8.setPreferredSize(new java.awt.Dimension(70, 70));
-        buttonsPanel.add(btn8, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 90, -1, -1));
-
-        btn9.setBackground(new java.awt.Color(21, 20, 22));
-        btn9.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btn9.setForeground(new java.awt.Color(255, 255, 255));
-        btn9.setText("9");
-        btn9.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btn9.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btn9.setFocusPainted(false);
-        btn9.setIconTextGap(1);
-        btn9.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btn9.setPreferredSize(new java.awt.Dimension(70, 70));
-        buttonsPanel.add(btn9, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 90, -1, -1));
-
-        btnSub.setBackground(new java.awt.Color(41, 39, 44));
-        btnSub.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btnSub.setForeground(new java.awt.Color(255, 255, 255));
-        btnSub.setText("-");
-        btnSub.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btnSub.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnSub.setFocusPainted(false);
-        btnSub.setIconTextGap(1);
-        btnSub.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btnSub.setPreferredSize(new java.awt.Dimension(70, 70));
-        btnSub.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSubActionPerformed(evt);
-            }
-        });
-        buttonsPanel.add(btnSub, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 90, -1, -1));
-
-        btn4.setBackground(new java.awt.Color(21, 20, 22));
-        btn4.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btn4.setForeground(new java.awt.Color(255, 255, 255));
-        btn4.setText("4");
-        btn4.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btn4.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btn4.setFocusPainted(false);
-        btn4.setIconTextGap(1);
-        btn4.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btn4.setPreferredSize(new java.awt.Dimension(70, 70));
-        buttonsPanel.add(btn4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 160, -1, -1));
-
-        btn5.setBackground(new java.awt.Color(21, 20, 22));
-        btn5.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btn5.setForeground(new java.awt.Color(255, 255, 255));
-        btn5.setText("5");
-        btn5.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btn5.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btn5.setFocusPainted(false);
-        btn5.setIconTextGap(1);
-        btn5.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btn5.setPreferredSize(new java.awt.Dimension(70, 70));
-        buttonsPanel.add(btn5, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 160, -1, -1));
-
-        btn6.setBackground(new java.awt.Color(21, 20, 22));
-        btn6.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btn6.setForeground(new java.awt.Color(255, 255, 255));
-        btn6.setText("6");
-        btn6.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btn6.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btn6.setFocusPainted(false);
-        btn6.setIconTextGap(1);
-        btn6.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btn6.setPreferredSize(new java.awt.Dimension(70, 70));
-        buttonsPanel.add(btn6, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 160, -1, -1));
-
-        btnPlus.setBackground(new java.awt.Color(41, 39, 44));
-        btnPlus.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btnPlus.setForeground(new java.awt.Color(255, 255, 255));
-        btnPlus.setText("+");
-        btnPlus.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btnPlus.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnPlus.setFocusPainted(false);
-        btnPlus.setIconTextGap(1);
-        btnPlus.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btnPlus.setPreferredSize(new java.awt.Dimension(70, 140));
-        btnPlus.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPlusActionPerformed(evt);
-            }
-        });
-        buttonsPanel.add(btnPlus, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 160, -1, -1));
-
-        btn1.setBackground(new java.awt.Color(21, 20, 22));
-        btn1.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btn1.setForeground(new java.awt.Color(255, 255, 255));
-        btn1.setText("1");
-        btn1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btn1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btn1.setFocusPainted(false);
-        btn1.setIconTextGap(1);
-        btn1.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btn1.setPreferredSize(new java.awt.Dimension(70, 70));
-        buttonsPanel.add(btn1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 230, -1, -1));
-
-        btn2.setBackground(new java.awt.Color(21, 20, 22));
-        btn2.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btn2.setForeground(new java.awt.Color(255, 255, 255));
-        btn2.setText("2");
-        btn2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btn2.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btn2.setFocusPainted(false);
-        btn2.setIconTextGap(1);
-        btn2.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btn2.setPreferredSize(new java.awt.Dimension(70, 70));
-        buttonsPanel.add(btn2, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 230, -1, -1));
-
-        btn3.setBackground(new java.awt.Color(21, 20, 22));
-        btn3.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btn3.setForeground(new java.awt.Color(255, 255, 255));
-        btn3.setText("3");
-        btn3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btn3.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btn3.setFocusPainted(false);
-        btn3.setIconTextGap(1);
-        btn3.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btn3.setPreferredSize(new java.awt.Dimension(70, 70));
-        buttonsPanel.add(btn3, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 230, -1, -1));
-
-        btnPlusSub.setBackground(new java.awt.Color(21, 20, 22));
-        btnPlusSub.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btnPlusSub.setForeground(new java.awt.Color(255, 255, 255));
-        btnPlusSub.setText("+/-");
-        btnPlusSub.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btnPlusSub.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnPlusSub.setFocusPainted(false);
-        btnPlusSub.setIconTextGap(1);
-        btnPlusSub.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btnPlusSub.setPreferredSize(new java.awt.Dimension(70, 70));
-        btnPlusSub.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPlusSubActionPerformed(evt);
-            }
-        });
-        buttonsPanel.add(btnPlusSub, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 300, -1, -1));
-
-        btn0.setBackground(new java.awt.Color(21, 20, 22));
-        btn0.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btn0.setForeground(new java.awt.Color(255, 255, 255));
-        btn0.setText("0");
-        btn0.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btn0.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btn0.setFocusPainted(false);
-        btn0.setIconTextGap(1);
-        btn0.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btn0.setPreferredSize(new java.awt.Dimension(70, 70));
-        buttonsPanel.add(btn0, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 300, -1, -1));
-
-        btnDot.setBackground(new java.awt.Color(21, 20, 22));
-        btnDot.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btnDot.setForeground(new java.awt.Color(255, 255, 255));
-        btnDot.setText(".");
-        btnDot.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btnDot.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnDot.setFocusPainted(false);
-        btnDot.setIconTextGap(1);
-        btnDot.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btnDot.setPreferredSize(new java.awt.Dimension(70, 70));
-        btnDot.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDotActionPerformed(evt);
-            }
-        });
-        buttonsPanel.add(btnDot, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 300, -1, -1));
-
-        btnEqual.setBackground(new java.awt.Color(41, 39, 44));
-        btnEqual.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
-        btnEqual.setForeground(new java.awt.Color(255, 255, 255));
-        btnEqual.setText("=");
-        btnEqual.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(41, 39, 44)));
-        btnEqual.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnEqual.setFocusPainted(false);
-        btnEqual.setIconTextGap(1);
-        btnEqual.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        btnEqual.setPreferredSize(new java.awt.Dimension(70, 70));
-        btnEqual.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnEqualActionPerformed(evt);
-            }
-        });
-        buttonsPanel.add(btnEqual, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 300, -1, -1));
-
-        app.add(buttonsPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 140, 320, 390));
-
-        titleBar.setBackground(new java.awt.Color(21, 20, 22));
-        titleBar.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
-            public void mouseDragged(java.awt.event.MouseEvent evt) {
-                titleBarMouseDragged(evt);
-            }
-        });
-        titleBar.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                titleBarMousePressed(evt);
-            }
-        });
-        titleBar.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        title.setFont(new java.awt.Font("Century Gothic", 1, 17)); // NOI18N
-        title.setForeground(new java.awt.Color(255, 255, 255));
-        title.setText("Calculator");
-        title.setPreferredSize(new java.awt.Dimension(84, 18));
-        title.setRequestFocusEnabled(false);
-        titleBar.add(title, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 2, -1, 25));
-
-        btnMini.setBackground(new java.awt.Color(21, 20, 22));
-        btnMini.setFont(new java.awt.Font("Century Gothic", 1, 24)); // NOI18N
-        btnMini.setForeground(new java.awt.Color(255, 255, 255));
-        btnMini.setText("-");
-        btnMini.setBorder(null);
-        btnMini.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnMini.setFocusPainted(false);
-        btnMini.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btnMiniMouseEntered(evt);
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btnMiniMouseExited(evt);
-            }
-        });
-        btnMini.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnMiniActionPerformed(evt);
-            }
-        });
-        titleBar.add(btnMini, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 0, 30, -1));
-
-        btnClose.setBackground(new java.awt.Color(21, 20, 22));
-        btnClose.setFont(new java.awt.Font("Century Gothic", 1, 24)); // NOI18N
-        btnClose.setForeground(new java.awt.Color(255, 255, 255));
-        btnClose.setText("×");
-        btnClose.setBorder(null);
-        btnClose.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        btnClose.setFocusPainted(false);
-        btnClose.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btnCloseMouseEntered(evt);
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btnCloseMouseExited(evt);
-            }
-        });
-        btnClose.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCloseActionPerformed(evt);
-            }
-        });
-        titleBar.add(btnClose, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 0, 30, -1));
-
-        app.add(titleBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 320, 30));
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(app, javax.swing.GroupLayout.PREFERRED_SIZE, 320, javax.swing.GroupLayout.PREFERRED_SIZE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(app, javax.swing.GroupLayout.PREFERRED_SIZE, 530, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
-
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
-
-    private void btnDotActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDotActionPerformed
-    }//GEN-LAST:event_btnDotActionPerformed
-
-    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
-        clear();
-    }//GEN-LAST:event_btnClearActionPerformed
-
-    private void btnDelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDelActionPerformed
-
-    }//GEN-LAST:event_btnDelActionPerformed
-
-    private void btnPlusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlusActionPerformed
-    }//GEN-LAST:event_btnPlusActionPerformed
-
-    private void btnMultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMultActionPerformed
-    }//GEN-LAST:event_btnMultActionPerformed
-
-    private void btnSubActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSubActionPerformed
-    }//GEN-LAST:event_btnSubActionPerformed
-
-    private void btnDivActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDivActionPerformed
-        chooseOperation("÷");
-    }//GEN-LAST:event_btnDivActionPerformed
-
-    private void btnEqualActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEqualActionPerformed
-        this.compute();
-        this.updateDisplay();
-        if (this.currentOperand.equals("Error"))
-            this.currentOperand = "";
-    }//GEN-LAST:event_btnEqualActionPerformed
-
-    private void btnPlusSubActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlusSubActionPerformed
-        if (!this.currentOperand.isEmpty()) {
-            float tmp = -Float.parseFloat(this.currentOperand);
-            this.currentOperand = (tmp - (int) tmp) != 0 ? Float.toString(tmp) : Integer.toString((int) tmp);
-            this.updateDisplay();
-        }
-    }//GEN-LAST:event_btnPlusSubActionPerformed
-
-    private void btnCloseMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCloseMouseEntered
-        btnClose.setBackground(new Color(255, 75, 75));
-        btnClose.setForeground(new Color(31, 30, 33));
-    }//GEN-LAST:event_btnCloseMouseEntered
-
-    private void btnCloseMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCloseMouseExited
-        btnClose.setBackground(new Color(21,20,22));
-        btnClose.setForeground(Color.WHITE);
-    }//GEN-LAST:event_btnCloseMouseExited
-
-    private void btnMiniMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnMiniMouseEntered
-        btnMini.setBackground(new Color(73, 69, 78));
-    }//GEN-LAST:event_btnMiniMouseEntered
-
-    private void btnMiniMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnMiniMouseExited
-        btnMini.setBackground(new Color(21,20,22));
-    }//GEN-LAST:event_btnMiniMouseExited
-
-    private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseActionPerformed
-        System.exit(0);
-    }//GEN-LAST:event_btnCloseActionPerformed
-
-    private void btnMiniActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMiniActionPerformed
-        setState(Calculator.ICONIFIED);
-    }//GEN-LAST:event_btnMiniActionPerformed
-
-    private void titleBarMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_titleBarMousePressed
-        x = evt.getX();
-        y = evt.getY();
-    }//GEN-LAST:event_titleBarMousePressed
-
-    private void titleBarMouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_titleBarMouseDragged
-        int xx = evt.getXOnScreen();
-        int yy = evt.getYOnScreen();
-        this.setLocation(xx - x, yy - y);
-    }//GEN-LAST:event_titleBarMouseDragged
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel app;
-    private static javax.swing.JButton btn0;
-    private static javax.swing.JButton btn1;
-    private static javax.swing.JButton btn2;
-    private static javax.swing.JButton btn3;
-    private static javax.swing.JButton btn4;
-    private static javax.swing.JButton btn5;
-    private static javax.swing.JButton btn6;
-    private static javax.swing.JButton btn7;
-    private static javax.swing.JButton btn8;
-    private static javax.swing.JButton btn9;
-    private static javax.swing.JButton btnClear;
-    private javax.swing.JButton btnClose;
-    private static javax.swing.JButton btnDel;
-    private static javax.swing.JButton btnDiv;
-    private static javax.swing.JButton btnDot;
-    private static javax.swing.JButton btnEqual;
-    private javax.swing.JButton btnMini;
-    private static javax.swing.JButton btnMult;
-    private static javax.swing.JButton btnPlus;
-    private static javax.swing.JButton btnPlusSub;
-    private static javax.swing.JButton btnSub;
-    private javax.swing.JPanel buttonsPanel;
-    private javax.swing.JTextField current;
-    private javax.swing.JTextField previous;
-    private javax.swing.JPanel resultsPanel;
-    private javax.swing.JLabel title;
-    private javax.swing.JPanel titleBar;
-    // End of variables declaration//GEN-END:variables
-

@@ -7,19 +7,16 @@ package Calc;
 
 /**
  *
- * @author reham
+ * @author wla03
  */
 
-
-public class Addition implements Operation {
+public class Logarithm implements Operation {
     private final Operation left, right;
-    public Addition(Operation left, Operation right) {
+    public Logarithm(Operation left, Operation right) {
         this.left = left; this.right = right;
     }
     @Override
     public float execute() {
-        return left.execute() + right.execute();
+        return (float) (Math.log(right.execute()) / Math.log(left.execute()));
     }
 }
-
-

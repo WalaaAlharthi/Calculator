@@ -7,19 +7,18 @@ package Calc;
 
 /**
  *
- * @author reham
+ * @author wla03
  */
 
 
-public class Addition implements Operation {
+public class Root implements Operation {
     private final Operation left, right;
-    public Addition(Operation left, Operation right) {
+    public Root(Operation left, Operation right) {
         this.left = left; this.right = right;
     }
     @Override
     public float execute() {
-        return left.execute() + right.execute();
+        return (float) Math.pow(left.execute(), 1.0 / right.execute());
     }
 }
-
 

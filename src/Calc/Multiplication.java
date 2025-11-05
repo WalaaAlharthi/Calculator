@@ -9,9 +9,16 @@ package Calc;
  *
  * @author reham
  */
+
+
 public class Multiplication implements Operation {
+    private final Operation left, right;
+    public Multiplication(Operation left, Operation right) {
+        this.left = left; this.right = right;
+    }
     @Override
-    public float execute(float a, float b) {
-        return a * b;
+    public float execute() {
+        return left.execute() * right.execute();
     }
 }
+
