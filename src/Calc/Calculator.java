@@ -63,7 +63,7 @@ public final class Calculator extends JFrame {
         setLocation(new Point(500, 100));
         setUndecorated(true);
         setResizable(false);
-        setSize(320, 600); // ✅ زودنا الطول شوي لأننا بنضيف صف جديد
+        setSize(320, 600); //  زودنا الطول شوي لأننا بنضيف صف جديد
 
         app.setBackground(new Color(13, 12, 20));
         app.setLayout(null);
@@ -94,7 +94,7 @@ public final class Calculator extends JFrame {
         app.add(resultsPanel);
 
         buttonsPanel.setBackground(new Color(21, 20, 22));
-        buttonsPanel.setBounds(0, 140, 320, 460); // ✅ زودنا الطول شوي
+        buttonsPanel.setBounds(0, 140, 320, 460); //  زودنا الطول شوي
 
         // الأزرار الأساسية
         btn0 = createButton("0", new Color(21, 20, 22), Color.WHITE, 70, 70);
@@ -118,19 +118,19 @@ public final class Calculator extends JFrame {
         btnDot = createButton(".", new Color(21, 20, 22), Color.WHITE, 70, 70);
         btnPlusSub = createButton("+/-", new Color(21, 20, 22), Color.WHITE, 70, 70);
 
-        // ✅ NEW - العمليات العلمية
+    
         btnPower = createButton("^", new Color(41, 39, 44), Color.WHITE, 70, 70);
         btnRoot = createButton("√", new Color(41, 39, 44), Color.WHITE, 70, 70);
         btnLog = createButton("log", new Color(41, 39, 44), Color.WHITE, 70, 70);
         btnMod = createButton("%", new Color(41, 39, 44), Color.WHITE, 70, 70);
 
-        // ✅ أماكن الأزرار الجديدة تحت آخر صف
+      
         btnPower.setBounds(20, 370, 70, 70);
         btnRoot.setBounds(90, 370, 70, 70);
         btnLog.setBounds(160, 370, 70, 70);
         btnMod.setBounds(230, 370, 70, 70);
 
-        // ترتيب الأزرار القديمة
+      
         btnDel.setBounds(20, 20, 70, 70);
         btnClear.setBounds(90, 20, 70, 70);
         btnDiv.setBounds(160, 20, 70, 70);
@@ -155,13 +155,13 @@ public final class Calculator extends JFrame {
         btn0.setBounds(90, 300, 70, 70);
         btnDot.setBounds(160, 300, 70, 70);
 
-        // ✅ إضافة الأزرار الجديدة
+      
         buttonsPanel.add(btnPower);
         buttonsPanel.add(btnRoot);
         buttonsPanel.add(btnLog);
         buttonsPanel.add(btnMod);
 
-        // إضافة القديمة
+    
         buttonsPanel.add(btnDel);
         buttonsPanel.add(btnClear);
         buttonsPanel.add(btnDiv);
@@ -211,8 +211,8 @@ public final class Calculator extends JFrame {
         btnMult.addActionListener(e -> { facade.chooseOperation("×"); updateDisplay(); });
         btnDiv.addActionListener(e -> { facade.chooseOperation("÷"); updateDisplay(); });
 
-        // ✅ الأحداث الجديدة
-        btnPower.addActionListener(e -> { facade.chooseOperation("power"); updateDisplay(); });
+      
+        btnPower.addActionListener(e -> { facade.chooseOperation("^"); updateDisplay(); });
         btnRoot.addActionListener(e -> { facade.chooseOperation("root"); updateDisplay(); });
         btnLog.addActionListener(e -> { facade.chooseOperation("log"); updateDisplay(); });
         btnMod.addActionListener(e -> { facade.chooseOperation("%"); updateDisplay(); });

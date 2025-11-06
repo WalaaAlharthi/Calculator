@@ -23,20 +23,25 @@ public class OperationFactory {
             case "-":
                 return new Subtraction(left, right);
             case "*":
+            case "×":
                 return new Multiplication(left, right);
             case "/":
+            case "÷":
                 return new Division(left, right);
             case "^":
             case "power":
                 return new Power(left, right);
+            case "√":
             case "root":
                 return new Root(left, right);
             case "log":
                 return new Logarithm(left, right);
-            case "%": 
+            case "%":
+            case "mod":
                 return new Modulus(left, right);
             default:
                 throw new IllegalArgumentException("Unsupported operation: " + op);
         }
     }
 }
+
