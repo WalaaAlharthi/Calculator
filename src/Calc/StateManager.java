@@ -49,4 +49,12 @@ public class StateManager {
             operator = newOp;
         }
     }
+
+    public void setPrevious(String value) {
+    this.previous = value;
+}
+
+public void setOperator(String value) {
+    this.operator = value;
+}
 }

@@ -1,251 +1,201 @@
 package Calc;
 
-
-
-
-import java.awt.*;
-import java.awt.event.*;
+import Calc.commands.*;
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionListener;
+
 
 public final class Calculator extends JFrame {
-    
-    
-    // ------------------ Singleton ------------------
 
-    private static Calculator instance = null;
-
-    private Calculator() {
-        initComponents();
-        addEvents();
-        updateDisplay();
-    }
-
+    // ---------------- Singleton ----------------
+    private static Calculator instance;
     public static Calculator getInstance() {
-        if (instance == null){
-            
-      instance = new Calculator();
-        }
+        if (instance == null) instance = new Calculator();
         return instance;
     }
-    // ------------------ Facade ------------------
+
+    // ---------------- Fields ----------------
     private final CalculatorFacade facade = new CalculatorFacade();
-    private int x, y;
+    private final CommandInvoker invoker = new CommandInvoker();
 
-    private JPanel app, buttonsPanel, resultsPanel, titleBar;
-    private JTextField current, previous;
-    private JLabel title;
-    private JButton btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9;
-    private JButton btnPlus, btnSub, btnMult, btnDiv, btnEqual, btnClear, btnDel, btnDot, btnPlusSub;
+    private JTextField displayCurrent;
+    private JTextField displayPrevious;
 
-  
-    private JButton btnPower, btnRoot, btnLog, btnMod;
+    // Buttons (kept as fields if you want later access)
+    private JButton btnDel, btnClear, btnUndo, btnRedo;
+    private JButton btn7, btn8, btn9, btnDiv;
+    private JButton btn4, btn5, btn6, btnMult;
+    private JButton btn1, btn2, btn3, btnEquals;
+    private JButton btnPlusMinus, btn0, btnDot, btnPlus;
+    private JButton btnPow, btnRoot, btnLog, btnMod;
 
-    private JButton createButton(String text, Color bgColor, Color fgColor, int width, int height) {
-        JButton button = new JButton(text);
-        button.setBackground(bgColor);
-        button.setForeground(fgColor);
-        button.setFont(new Font("Century Gothic", Font.BOLD, 18));
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createLineBorder(bgColor));
-        button.setBounds(0, 0, width, height);
-        return button;
-    }
-
-    private void initComponents() {
-        app = new JPanel(null);
-        resultsPanel = new JPanel(null);
-        buttonsPanel = new JPanel(null);
-        titleBar = new JPanel(null);
-        title = new JLabel("Calculator");
-
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    // ---------------- Constructor (private for singleton) ----------------
+    private Calculator() {
         setTitle("Calculator");
-        setLocation(new Point(500, 100));
-        setUndecorated(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(340, 560);
         setResizable(false);
-        setSize(320, 600); //  زودنا الطول شوي لأننا بنضيف صف جديد
+        setLocationRelativeTo(null);
 
-        app.setBackground(new Color(13, 12, 20));
-        app.setLayout(null);
+        // Use BorderLayout: top display, center buttons
+        setLayout(new BorderLayout());
+        initDisplay();
+        initButtons();
+        updateDisplay();
 
-        resultsPanel.setBackground(new Color(34, 34, 34));
-        resultsPanel.setBounds(0, 30, 320, 110);
-
-        previous = new JTextField();
-        previous.setEditable(false);
-        previous.setBackground(new Color(21, 20, 22));
-        previous.setFont(new Font("Century Gothic", Font.BOLD, 18));
-        previous.setForeground(new Color(203, 198, 213));
-        previous.setHorizontalAlignment(JTextField.RIGHT);
-        previous.setBorder(null);
-        previous.setBounds(0, 0, 320, 50);
-        resultsPanel.add(previous);
-
-        current = new JTextField();
-        current.setEditable(false);
-        current.setBackground(new Color(41, 39, 44));
-        current.setFont(new Font("Century Gothic", Font.BOLD, 24));
-        current.setForeground(Color.WHITE);
-        current.setHorizontalAlignment(JTextField.RIGHT);
-        current.setBorder(null);
-        current.setBounds(0, 50, 320, 60);
-        resultsPanel.add(current);
-
-        app.add(resultsPanel);
-
-        buttonsPanel.setBackground(new Color(21, 20, 22));
-        buttonsPanel.setBounds(0, 140, 320, 460); //  زودنا الطول شوي
-
-        // الأزرار الأساسية
-        btn0 = createButton("0", new Color(21, 20, 22), Color.WHITE, 70, 70);
-        btn1 = createButton("1", new Color(21, 20, 22), Color.WHITE, 70, 70);
-        btn2 = createButton("2", new Color(21, 20, 22), Color.WHITE, 70, 70);
-        btn3 = createButton("3", new Color(21, 20, 22), Color.WHITE, 70, 70);
-        btn4 = createButton("4", new Color(21, 20, 22), Color.WHITE, 70, 70);
-        btn5 = createButton("5", new Color(21, 20, 22), Color.WHITE, 70, 70);
-        btn6 = createButton("6", new Color(21, 20, 22), Color.WHITE, 70, 70);
-        btn7 = createButton("7", new Color(21, 20, 22), Color.WHITE, 70, 70);
-        btn8 = createButton("8", new Color(21, 20, 22), Color.WHITE, 70, 70);
-        btn9 = createButton("9", new Color(21, 20, 22), Color.WHITE, 70, 70);
-
-        btnPlus = createButton("+", new Color(41, 39, 44), Color.WHITE, 70, 140);
-        btnSub = createButton("-", new Color(41, 39, 44), Color.WHITE, 70, 70);
-        btnMult = createButton("×", new Color(41, 39, 44), Color.WHITE, 70, 70);
-        btnDiv = createButton("÷", new Color(41, 39, 44), Color.WHITE, 70, 70);
-        btnEqual = createButton("=", new Color(41, 39, 44), Color.WHITE, 70, 70);
-        btnClear = createButton("C", new Color(41, 39, 44), Color.WHITE, 70, 70);
-        btnDel = createButton("←", new Color(41, 39, 44), Color.WHITE, 70, 70);
-        btnDot = createButton(".", new Color(21, 20, 22), Color.WHITE, 70, 70);
-        btnPlusSub = createButton("+/-", new Color(21, 20, 22), Color.WHITE, 70, 70);
-
-    
-        btnPower = createButton("^", new Color(41, 39, 44), Color.WHITE, 70, 70);
-        btnRoot = createButton("√", new Color(41, 39, 44), Color.WHITE, 70, 70);
-        btnLog = createButton("log", new Color(41, 39, 44), Color.WHITE, 70, 70);
-        btnMod = createButton("%", new Color(41, 39, 44), Color.WHITE, 70, 70);
-
-      
-        btnPower.setBounds(20, 370, 70, 70);
-        btnRoot.setBounds(90, 370, 70, 70);
-        btnLog.setBounds(160, 370, 70, 70);
-        btnMod.setBounds(230, 370, 70, 70);
-
-      
-        btnDel.setBounds(20, 20, 70, 70);
-        btnClear.setBounds(90, 20, 70, 70);
-        btnDiv.setBounds(160, 20, 70, 70);
-        btnMult.setBounds(230, 20, 70, 70);
-
-        btn7.setBounds(20, 90, 70, 70);
-        btn8.setBounds(90, 90, 70, 70);
-        btn9.setBounds(160, 90, 70, 70);
-        btnSub.setBounds(230, 90, 70, 70);
-
-        btn4.setBounds(20, 160, 70, 70);
-        btn5.setBounds(90, 160, 70, 70);
-        btn6.setBounds(160, 160, 70, 70);
-        btnPlus.setBounds(230, 160, 70, 140);
-
-        btn1.setBounds(20, 230, 70, 70);
-        btn2.setBounds(90, 230, 70, 70);
-        btn3.setBounds(160, 230, 70, 70);
-        btnEqual.setBounds(230, 300, 70, 70);
-
-        btnPlusSub.setBounds(20, 300, 70, 70);
-        btn0.setBounds(90, 300, 70, 70);
-        btnDot.setBounds(160, 300, 70, 70);
-
-      
-        buttonsPanel.add(btnPower);
-        buttonsPanel.add(btnRoot);
-        buttonsPanel.add(btnLog);
-        buttonsPanel.add(btnMod);
-
-    
-        buttonsPanel.add(btnDel);
-        buttonsPanel.add(btnClear);
-        buttonsPanel.add(btnDiv);
-        buttonsPanel.add(btnMult);
-        buttonsPanel.add(btn7);
-        buttonsPanel.add(btn8);
-        buttonsPanel.add(btn9);
-        buttonsPanel.add(btnSub);
-        buttonsPanel.add(btn4);
-        buttonsPanel.add(btn5);
-        buttonsPanel.add(btn6);
-        buttonsPanel.add(btnPlus);
-        buttonsPanel.add(btn1);
-        buttonsPanel.add(btn2);
-        buttonsPanel.add(btn3);
-        buttonsPanel.add(btnEqual);
-        buttonsPanel.add(btnPlusSub);
-        buttonsPanel.add(btn0);
-        buttonsPanel.add(btnDot);
-
-        app.add(buttonsPanel);
-
-        titleBar.setBackground(new Color(21, 20, 22));
-        titleBar.setBounds(0, 0, 320, 30);
-
-        title.setFont(new Font("Century Gothic", Font.BOLD, 17));
-        title.setForeground(Color.WHITE);
-        title.setBounds(6, 2, 200, 25);
-        titleBar.add(title);
-
-        app.add(titleBar);
-        add(app);
+        // make visible
+        setVisible(true);
     }
 
-    private void addEvents() {
-        JButton[] numbers = {btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9};
-        for (int i = 0; i < numbers.length; i++) {
-            int num = i;
-            numbers[i].addActionListener(e -> {
-                facade.appendNumber(Integer.toString(num));
-                updateDisplay();
-            });
-        }
-
-        btnPlus.addActionListener(e -> { facade.chooseOperation("+"); updateDisplay(); });
-        btnSub.addActionListener(e -> { facade.chooseOperation("-"); updateDisplay(); });
-        btnMult.addActionListener(e -> { facade.chooseOperation("×"); updateDisplay(); });
-        btnDiv.addActionListener(e -> { facade.chooseOperation("÷"); updateDisplay(); });
-
-      
-        btnPower.addActionListener(e -> { facade.chooseOperation("^"); updateDisplay(); });
-        btnRoot.addActionListener(e -> { facade.chooseOperation("root"); updateDisplay(); });
-        btnLog.addActionListener(e -> { facade.chooseOperation("log"); updateDisplay(); });
-        btnMod.addActionListener(e -> { facade.chooseOperation("%"); updateDisplay(); });
-
-        btnDot.addActionListener(e -> { facade.appendNumber("."); updateDisplay(); });
-
-  btnEqual.addActionListener(e -> {
-    try {
-        facade.compute();
-    } catch (Exception ex) {
-        facade.showError();   
+    // ---------------- Create styled button helper ----------------
+    private JButton createButton(String text) {
+        JButton b = new JButton(text);
+        b.setFocusPainted(false);
+        b.setFont(new Font("Century Gothic", Font.BOLD, 18));
+        b.setForeground(Color.WHITE);
+        b.setBackground(new Color(34, 34, 34));
+        b.setBorder(BorderFactory.createLineBorder(new Color(34, 34, 34)));
+        return b;
     }
 
-    updateDisplay();
-});
+    // ---------------- Display (dark) ----------------
+    private void initDisplay() {
+        JPanel displayPanel = new JPanel();
+        displayPanel.setLayout(new GridLayout(2, 1));
+        displayPanel.setBackground(new Color(13, 12, 20));
+        displayPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
+        displayPrevious = new JTextField();
+        displayPrevious.setEditable(false);
+        displayPrevious.setBackground(new Color(21, 20, 22));
+        displayPrevious.setForeground(new Color(203, 198, 213));
+        displayPrevious.setFont(new Font("Century Gothic", Font.BOLD, 16));
+        displayPrevious.setHorizontalAlignment(JTextField.RIGHT);
+        displayPrevious.setBorder(null);
 
-        btnClear.addActionListener(e -> { facade.clear(); updateDisplay(); });
-        btnDel.addActionListener(e -> { facade.deleteLast(); updateDisplay(); });
-        btnPlusSub.addActionListener(e -> { facade.togglePlusMinus(); updateDisplay(); });
+        displayCurrent = new JTextField();
+        displayCurrent.setEditable(false);
+        displayCurrent.setBackground(new Color(41, 39, 44));
+        displayCurrent.setForeground(Color.WHITE);
+        displayCurrent.setFont(new Font("Century Gothic", Font.BOLD, 28));
+        displayCurrent.setHorizontalAlignment(JTextField.RIGHT);
+        displayCurrent.setBorder(null);
 
-        titleBar.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent evt) { x = evt.getX(); y = evt.getY(); }
-        });
-        titleBar.addMouseMotionListener(new MouseMotionAdapter() {
-            public void mouseDragged(MouseEvent evt) {
-                setLocation(evt.getXOnScreen() - x, evt.getYOnScreen() - y);
+        displayPanel.add(displayPrevious);
+        displayPanel.add(displayCurrent);
+
+        add(displayPanel, BorderLayout.NORTH);
+    }
+
+    // ---------------- Buttons grid and listeners ----------------
+    private void initButtons() {
+        JPanel grid = new JPanel(new GridLayout(6, 4, 6, 6));
+        grid.setBackground(new Color(21, 20, 22));
+        grid.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Row 1: DEL, C, Undo, Redo
+        btnDel = createButton("←");
+        btnClear = createButton("C");
+        btnUndo = createButton("Undo");
+        btnRedo = createButton("Redo");
+
+        // Row 2
+        btn7 = createButton("7");
+        btn8 = createButton("8");
+        btn9 = createButton("9");
+        btnDiv = createButton("÷");
+
+        // Row 3
+        btn4 = createButton("4");
+        btn5 = createButton("5");
+        btn6 = createButton("6");
+        btnMult = createButton("×");
+
+        // Row 4
+        btn1 = createButton("1");
+        btn2 = createButton("2");
+        btn3 = createButton("3");
+        btnEquals = createButton("=");
+
+        // Row 5
+        btnPlusMinus = createButton("+/-");
+        btn0 = createButton("0");
+        btnDot = createButton(".");
+        btnPlus = createButton("+");
+
+        // Row 6
+        btnPow = createButton("^");
+        btnRoot = createButton("√");
+        btnLog = createButton("log");
+        btnMod = createButton("%");
+
+        // Add all in order
+        grid.add(btnDel);     grid.add(btnClear); grid.add(btnUndo);  grid.add(btnRedo);
+        grid.add(btn7);       grid.add(btn8);      grid.add(btn9);      grid.add(btnDiv);
+        grid.add(btn4);       grid.add(btn5);      grid.add(btn6);      grid.add(btnMult);
+        grid.add(btn1);       grid.add(btn2);      grid.add(btn3);      grid.add(btnEquals);
+        grid.add(btnPlusMinus); grid.add(btn0);    grid.add(btnDot);    grid.add(btnPlus);
+        grid.add(btnPow);     grid.add(btnRoot);   grid.add(btnLog);    grid.add(btnMod);
+
+        add(grid, BorderLayout.CENTER);
+
+        // ----------------- Attach listeners (Command pattern) -----------------
+
+        // Numbers and dot
+        ActionListener numberListener = e -> {
+            String txt = ((JButton) e.getSource()).getText();
+            // map "+/-" to the toggle sign command
+            if (txt.equals("+/-")) {
+                invoker.execute(new ToggleSignCommand(facade));
+            } else {
+                invoker.execute(new AppendNumberCommand(facade, txt));
             }
+            updateDisplay();
+        };
+
+        btn0.addActionListener(numberListener);
+        btn1.addActionListener(numberListener);
+        btn2.addActionListener(numberListener);
+        btn3.addActionListener(numberListener);
+        btn4.addActionListener(numberListener);
+        btn5.addActionListener(numberListener);
+        btn6.addActionListener(numberListener);
+        btn7.addActionListener(numberListener);
+        btn8.addActionListener(numberListener);
+        btn9.addActionListener(numberListener);
+        btnDot.addActionListener(numberListener);
+        btnPlusMinus.addActionListener(numberListener);
+
+        // Operators
+        btnDiv.addActionListener(e -> { invoker.execute(new ChooseOperationCommand(facade, "÷")); updateDisplay(); });
+        btnMult.addActionListener(e -> { invoker.execute(new ChooseOperationCommand(facade, "×")); updateDisplay(); });
+        btnPlus.addActionListener(e -> { invoker.execute(new ChooseOperationCommand(facade, "+")); updateDisplay(); });
+        btnEquals.addActionListener(e -> {
+            try {
+                invoker.execute(new ComputeCommand(facade));
+            } catch (Exception ex) {
+                facade.showError();
+            }
+            updateDisplay();
         });
+
+        // Side operators
+        btnPow.addActionListener(e -> { invoker.execute(new ChooseOperationCommand(facade, "^")); updateDisplay(); });
+        btnRoot.addActionListener(e -> { invoker.execute(new ChooseOperationCommand(facade, "root")); updateDisplay(); });
+        btnLog.addActionListener(e -> { invoker.execute(new ChooseOperationCommand(facade, "log")); updateDisplay(); });
+        btnMod.addActionListener(e -> { invoker.execute(new ChooseOperationCommand(facade, "%")); updateDisplay(); });
+
+        // Clear, Delete, Undo, Redo
+        btnClear.addActionListener(e -> { invoker.execute(new ClearCommand(facade)); updateDisplay(); });
+        btnDel.addActionListener(e -> { invoker.execute(new DeleteCommand(facade)); updateDisplay(); });
+        btnUndo.addActionListener(e -> { invoker.undo(); updateDisplay(); });
+        btnRedo.addActionListener(e -> { invoker.redo(); updateDisplay(); });
     }
 
+    // ---------------- Update display from facade ----------------
     private void updateDisplay() {
-        current.setText(facade.getCurrentDisplay());
-        previous.setText(facade.getPreviousDisplay());
+        displayCurrent.setText(facade.getCurrentDisplay());
+        displayPrevious.setText(facade.getPreviousDisplay());
     }
 }

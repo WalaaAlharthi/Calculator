@@ -1,5 +1,4 @@
 package Calc;
-
 public class CalculatorFacade {
 
     private final StateManager state = new StateManager();
@@ -55,8 +54,27 @@ public class CalculatorFacade {
     state.setCurrent("Error");
     state.clearAll();
 }
-
+    public void forceSetCurrent(String value) {
+    state.setCurrent(value);
 }
 
+public String getOperator() {
+    return state.getOperator();
+}
 
+public void restoreState(String current, String previous, String operator) {
+    state.setCurrent(current);
+    state.setPrevious(previous);
+    state.setOperator(operator);
+}
+public void toggleSign() {
+    String value = state.getCurrent();
+    if (value.startsWith("-")) {
+        state.setCurrent(value.substring(1));       // -5 → 5
+    } else if (!value.equals("0")) {
+        state.setCurrent("-" + value);             // 5 → -5
+    }
+}
+
+}
 
