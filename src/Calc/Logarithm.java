@@ -16,7 +16,7 @@ public class Logarithm implements Operation {
         this.left = left; this.right = right;
     }
     @Override
-    public float execute() {
-        return (float) (Math.log(right.execute()) / Math.log(left.execute()));
+    public float evaluate() {
+        return (float) (Math.log(right.evaluate()) / Math.log(left.evaluate()));
     }
 }

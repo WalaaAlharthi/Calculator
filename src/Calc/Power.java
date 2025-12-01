@@ -17,7 +17,7 @@ public class Power implements Operation {
         this.left = left; this.right = right;
     }
     @Override
-    public float execute() {
-        return (float) Math.pow(left.execute(), right.execute());
+    public float evaluate() {
+        return (float) Math.pow(left.evaluate(), right.evaluate());
     }
 }

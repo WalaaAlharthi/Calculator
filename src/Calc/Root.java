@@ -17,8 +17,8 @@ public class Root implements Operation {
         this.left = left; this.right = right;
     }
     @Override
-    public float execute() {
-        return (float) Math.pow(left.execute(), 1.0 / right.execute());
+    public float evaluate() {
+        return (float) Math.pow(left.evaluate(), 1.0 / right.evaluate());
     }
 }
 

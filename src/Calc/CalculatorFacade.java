@@ -1,92 +1,62 @@
 package Calc;
 
-/**
- * Facade class for Calculator logic.
- * It manages the operands, operation, and calculation.
- * UI should call these methods and then update the display.
- */
-
-
 public class CalculatorFacade {
 
-    private String currentOperand = "";
-    private String previousOperand = "";
-    private String operation = "";
+    private final StateManager state = new StateManager();
+    private final InputManager input = new InputManager();
+    private final OperationManager operations = new OperationManager();
+    private final DisplayManager display = new DisplayManager();
 
-    // ------------------ Getter / Setter ------------------
-    public String getCurrentDisplay() {
-        return currentOperand;
-    }
+    // ----------------- UI Actions -----------------
 
-    public String getPreviousDisplay() {
-        return previousOperand + " " + operation;
-    }
-
-    public void setCurrentDisplay(String value) {
-        currentOperand = value;
-    }
-
-    public void clearPrevious() {
-        previousOperand = "";
-        operation = "";
-    }
-
-    // ------------------ Basic Input Handling ------------------
-    public void appendNumber(String number) {
-        if (number.equals(".") && currentOperand.contains(".")) return;
-        if (currentOperand.equals("0") && !number.equals(".")) currentOperand = "";
-        currentOperand += number;
+    public void appendNumber(String num) {
+        state.setCurrent(input.appendNumber(state.getCurrent(), num));
     }
 
     public void chooseOperation(String op) {
-       
-        if (!currentOperand.isEmpty()) {
-            currentOperand += " " + op + " ";
+        // If an operation already exists, compute automatically
+        if (state.hasPendingOperation()) {
+            compute();
         }
+
+        state.startOperation(op);
     }
 
-    // ------------------ Compute Expression ------------------
     public void compute() {
-        if (currentOperand.isEmpty()) return;
-
-        try {
-          
-            Operation op = ExpressionParser.parse(currentOperand);
-            float result = op.execute();
-            currentOperand = (result - (int) result) != 0
-                    ? Float.toString(result)
-                    : Integer.toString((int) result);
-
-            previousOperand = "";
-            operation = "";
-
-        } catch (Exception e) {
-            currentOperand = "Error";
-        }
-    }
-
-    // ------------------ Utility Methods ------------------
-    public void clear() {
-        currentOperand = "";
-        previousOperand = "";
-        operation = "";
+        String result = operations.compute(state);
+        state.applyResult(result);
     }
 
     public void deleteLast() {
-        if (!currentOperand.isEmpty()) {
-            currentOperand = currentOperand.substring(0, currentOperand.length() - 1);
-        }
+        state.setCurrent(input.deleteLast(state.getCurrent()));
     }
 
     public void togglePlusMinus() {
-        if (!currentOperand.isEmpty()) {
-            try {
-                float tmp = -Float.parseFloat(currentOperand);
-                currentOperand = (tmp - (int) tmp) != 0 ? Float.toString(tmp) : Integer.toString((int) tmp);
-            } catch (NumberFormatException e) {
-               
-            }
-        }
+        state.setCurrent(input.toggleSign(state.getCurrent()));
     }
+
+    public void clear() {
+        state.clearAll();
+    }
+
+    // ----------------- UI Display -----------------
+
+    public String getCurrentDisplay() {
+        return display.formatCurrent(state.getCurrent());
+    }
+
+    public String getPreviousDisplay() {
+        return display.formatPrevious(
+                state.getPrevious(),
+                state.getOperator()
+        );
+    }
+    public void showError() {
+    state.setCurrent("Error");
+    state.clearAll();
 }
+
+}
+
+
 

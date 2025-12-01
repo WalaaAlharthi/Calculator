@@ -16,10 +16,11 @@ public class Addition implements Operation {
     public Addition(Operation left, Operation right) {
         this.left = left; this.right = right;
     }
-    @Override
-    public float execute() {
-        return left.execute() + right.execute();
-    }
+ @Override
+public float evaluate() {
+    return left.evaluate() + right.evaluate();
+}
+
 }
 
 

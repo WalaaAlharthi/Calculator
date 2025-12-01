@@ -16,10 +16,10 @@ public class Division implements Operation {
         this.left = left; this.right = right;
     }
     @Override
-    public float execute() {
-        float r = right.execute();
+    public float evaluate() {
+        float r = right.evaluate();
         if (r == 0) throw new ArithmeticException("Division by zero");
-        return left.execute() / r;
+        return left.evaluate() / r;
     }
 }
 

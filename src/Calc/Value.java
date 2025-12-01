@@ -5,15 +5,15 @@
  */
 package Calc;
 
-/**
- *
- * @author wla03
- */
-
-
 public class Value implements Operation {
     private final float value;
-    public Value(float value) { this.value = value; }
+
+    public Value(float value) {
+        this.value = value;
+    }
+
     @Override
-    public float execute() { return value; }
+    public float evaluate() {
+        return value;
+    }
 }

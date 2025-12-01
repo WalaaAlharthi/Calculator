@@ -28,9 +28,9 @@ public class CompositeOperation implements Operation {
     }
 
     @Override
-    public float execute() {
+    public float evaluate() {
         if (root == null) throw new IllegalStateException("No operation set");
-        return root.execute();
+        return root.evaluate();
     }
 }
 

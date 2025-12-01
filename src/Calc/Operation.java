@@ -11,5 +11,5 @@ package Calc;
 
 public interface Operation {
    
-    float execute();
+    float evaluate();
 }

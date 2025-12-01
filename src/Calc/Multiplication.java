@@ -17,8 +17,8 @@ public class Multiplication implements Operation {
         this.left = left; this.right = right;
     }
     @Override
-    public float execute() {
-        return left.execute() * right.execute();
+    public float evaluate() {
+        return left.evaluate() * right.evaluate();
     }
 }
 

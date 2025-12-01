@@ -21,9 +21,9 @@ public class Modulus implements Operation {
     }
 
     @Override
-    public float execute() {
-        float l = left.execute();
-        float r = right.execute();
+    public float evaluate() {
+        float l = left.evaluate();
+        float r = right.evaluate();
         if (r == 0) throw new ArithmeticException("Division by zero in modulus");
         return l % r;
     }

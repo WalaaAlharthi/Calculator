@@ -219,18 +219,16 @@ public final class Calculator extends JFrame {
 
         btnDot.addActionListener(e -> { facade.appendNumber("."); updateDisplay(); });
 
-        btnEqual.addActionListener(e -> {
-            try {
-                String expression = facade.getCurrentDisplay();
-                Operation op = ExpressionParser.parse(expression);
-                float result = op.execute();
-                facade.setCurrentDisplay(String.valueOf(result));
-                facade.clearPrevious();
-            } catch (Exception ex) {
-                facade.setCurrentDisplay("Error");
-            }
-            updateDisplay();
-        });
+  btnEqual.addActionListener(e -> {
+    try {
+        facade.compute();
+    } catch (Exception ex) {
+        facade.showError();   
+    }
+
+    updateDisplay();
+});
+
 
         btnClear.addActionListener(e -> { facade.clear(); updateDisplay(); });
         btnDel.addActionListener(e -> { facade.deleteLast(); updateDisplay(); });
