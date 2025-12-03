@@ -1,27 +1,29 @@
+
 package Calc.commands;
 
-import Calc.CalculatorFacade;
+import Calc.*;
 
 public class ComputeCommand implements Command {
 
-    private final CalculatorFacade facade;
+    private final CalculatorContext ctx;
     private String prevCurrent, prevPrevious, prevOp;
 
-    public ComputeCommand(CalculatorFacade facade) {
-        this.facade = facade;
+    public ComputeCommand(CalculatorContext ctx) {
+        this.ctx = ctx;
     }
 
     @Override
     public void execute() {
-        prevCurrent  = facade.getCurrentDisplay();
-        prevPrevious = facade.getPreviousDisplay();
-        prevOp       = facade.getOperator();
+        CalculatorFacade f = ctx.getFacade();
+        prevCurrent  = f.getRawCurrent();
+        prevPrevious = f.getRawPrevious();
+        prevOp       = f.getRawOperator();
 
-        facade.compute();
+        ctx.getState().onEquals(ctx);
     }
 
     @Override
     public void undo() {
-        facade.restoreState(prevCurrent, prevPrevious, prevOp);
+        ctx.getFacade().restoreState(prevCurrent, prevPrevious, prevOp);
     }
 }

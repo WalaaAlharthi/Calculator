@@ -1,26 +1,27 @@
 package Calc.commands;
 
-import Calc.CalculatorFacade;
+import Calc.*;
 
 public class AppendNumberCommand implements Command {
 
-    private final CalculatorFacade facade;
-    private final String number;
-    private String previousState;
+    private final CalculatorContext ctx;
+    private final String digit;
+    private String prevCurrent;
 
-    public AppendNumberCommand(CalculatorFacade facade, String number) {
-        this.facade = facade;
-        this.number = number;
+    public AppendNumberCommand(CalculatorContext ctx, String digit) {
+        this.ctx = ctx;
+        this.digit = digit;
     }
 
     @Override
     public void execute() {
-        previousState = facade.getCurrentDisplay();
-        facade.appendNumber(number);
+        CalculatorFacade facade = ctx.getFacade();
+        prevCurrent = facade.getRawCurrent();   // القيمة الحقيقية
+        ctx.getState().onNumber(ctx, digit);
     }
 
     @Override
     public void undo() {
-        facade.forceSetCurrent(previousState);
+        ctx.getFacade().forceSetCurrent(prevCurrent);
     }
 }

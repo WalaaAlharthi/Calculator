@@ -8,11 +8,29 @@ package Calc;
 public class DisplayManager {
 
     public String formatCurrent(String value) {
-        return value.isEmpty() ? "0" : value;
+
+        // لو القيمة null أو Error → رجّعها كما هي
+        if (value == null || value.equals("Error")) {
+            return value;
+        }
+
+        // أهم تعديل: إذا رجعت القيمة من UNDO يعني user رجع خطوة
+        // لا نعرض 0، نعرضها كما هي
+        if (value.isEmpty()) {
+            return "";
+        }
+
+        return value;
     }
 
     public String formatPrevious(String prev, String op) {
-        if (prev.isEmpty() || op.isEmpty()) return "";
+
+        if (prev == null || op == null) return "";
+
+        if (prev.isEmpty() || op.isEmpty()) {
+            return "";
+        }
+
         return prev + " " + op;
     }
 }

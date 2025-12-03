@@ -1,27 +1,29 @@
+
 package Calc.commands;
 
-import Calc.CalculatorFacade;
+import Calc.*;
 
 public class ClearCommand implements Command {
 
-    private final CalculatorFacade facade;
+    private final CalculatorContext ctx;
     private String prevCurrent, prevPrevious, prevOp;
 
-    public ClearCommand(CalculatorFacade facade) {
-        this.facade = facade;
+    public ClearCommand(CalculatorContext ctx) {
+        this.ctx = ctx;
     }
 
     @Override
     public void execute() {
-        prevCurrent  = facade.getCurrentDisplay();
-        prevPrevious = facade.getPreviousDisplay();
-        prevOp       = facade.getOperator();
-        facade.clear();
+        CalculatorFacade f = ctx.getFacade();
+        prevCurrent  = f.getRawCurrent();
+        prevPrevious = f.getRawPrevious();
+        prevOp       = f.getRawOperator();
+
+        ctx.getState().onClear(ctx);
     }
 
     @Override
     public void undo() {
-        facade.restoreState(prevCurrent, prevPrevious, prevOp);
+        ctx.getFacade().restoreState(prevCurrent, prevPrevious, prevOp);
     }
 }
-

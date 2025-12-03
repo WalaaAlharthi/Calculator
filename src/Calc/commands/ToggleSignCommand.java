@@ -1,24 +1,25 @@
 package Calc.commands;
 
-import Calc.CalculatorFacade;
+import Calc.*;
 
 public class ToggleSignCommand implements Command {
 
-    private final CalculatorFacade facade;
-    private String previousState;
+    private final CalculatorContext ctx;
+    private String prevCurrent;
 
-    public ToggleSignCommand(CalculatorFacade facade) {
-        this.facade = facade;
+    public ToggleSignCommand(CalculatorContext ctx) {
+        this.ctx = ctx;
     }
 
     @Override
     public void execute() {
-        previousState = facade.getCurrentDisplay();
-        facade.toggleSign();
+        CalculatorFacade facade = ctx.getFacade();
+        prevCurrent = facade.getRawCurrent();
+        ctx.getState().onToggleSign(ctx);
     }
 
     @Override
     public void undo() {
-        facade.forceSetCurrent(previousState);
+        ctx.getFacade().forceSetCurrent(prevCurrent);
     }
 }

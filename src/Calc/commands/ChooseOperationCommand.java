@@ -1,30 +1,32 @@
+
 package Calc.commands;
 
-import Calc.CalculatorFacade;
+import Calc.*;
 
 public class ChooseOperationCommand implements Command {
 
-    private final CalculatorFacade facade;
+    private final CalculatorContext ctx;
     private final String operator;
+
     private String prevCurrent, prevPrevious, prevOp;
 
-    public ChooseOperationCommand(CalculatorFacade facade, String operator) {
-        this.facade = facade;
+    public ChooseOperationCommand(CalculatorContext ctx, String operator) {
+        this.ctx = ctx;
         this.operator = operator;
     }
 
     @Override
     public void execute() {
-        prevCurrent  = facade.getCurrentDisplay();
-        prevPrevious = facade.getPreviousDisplay();
-        prevOp       = facade.getOperator();
+        CalculatorFacade f = ctx.getFacade();
+        prevCurrent  = f.getRawCurrent();
+        prevPrevious = f.getRawPrevious();
+        prevOp       = f.getRawOperator();
 
-        facade.chooseOperation(operator);
+        ctx.getState().onOperation(ctx, operator);
     }
 
     @Override
     public void undo() {
-        facade.restoreState(prevCurrent, prevPrevious, prevOp);
+        ctx.getFacade().restoreState(prevCurrent, prevPrevious, prevOp);
     }
 }
-
